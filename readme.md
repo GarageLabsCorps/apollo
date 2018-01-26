@@ -12,6 +12,9 @@ Light launcher
 ### Reinstall
 `sudo make reinstall`
 
+### Update
+`apollo -u`
+
 ### In future
 Add the possibility to open the search with a shortcut
 
