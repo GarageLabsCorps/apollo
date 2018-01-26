@@ -5,7 +5,7 @@ try:
 	import tkinter as tk
 except:
 	import Tkinter as tk
-v="0.1"
+v="1.0"
 def trow():
 	return int(os.popen('stty size','r').read().split()[0])
 def tcolumns():
@@ -19,7 +19,7 @@ def gs(n,r):
 			return "".join(a.split("|")[:-1])
 			break
 def exe(w):
-	os.system("%s"%w)
+	os.system("%s &"%w)
 def entrytext(e):
 	sw=[f for f in os.listdir("/usr/share/applications/") if os.path.isfile("/usr/share/applications/"+f)]
 	sl={}
@@ -86,11 +86,48 @@ def select(e):
 		e.widget.tk_focusNext().focus()
 	elif e.keysym=="Up":
 		pass
+	elif e.keysym=="Escape":
+		w.destroy()
 class bcolors:
 	GN='\033[92m'
 	BE='\033[94m'
+	RD='\033[91m'
 	BOLD='\033[1m'
 	ENDC='\033[0m'
+try:
+	if len(sys.argv)>1:
+		if sys.argv[1]=="-u":
+			import urllib,re
+			print "You are using: "+bcolors.BE+"v"+v+bcolors.ENDC
+			llc=urllib.urlopen("https://raw.githubusercontent.com/GarageLabsCorps/apollo/master/apollo").read()
+			lc=llc.replace("\n","")
+			if not 'v="' in lc:
+				lv="0.1"
+			else:
+				for line in llc.splitlines():
+					if 'v="' in line:
+						lv="".join(re.findall('v="(.*?)"',line))
+						break
+			print "Latest: "+bcolors.BE+"v"+lv+bcolors.ENDC
+			if float(v)<float(lv):
+				print bcolors.RD+"Your software isn't up to date."+bcolors.ENDC
+				up=raw_input("Update? [y or n]: ")
+				if up.lower()=="y" or up.lower()=="yes":
+					try:
+						print "Update..."
+						os.system("git clone https://github.com/GarageLabsCorps/apollo temp && cd temp/ && mv ../temp/* .. && rm -rf ../temp")
+						print "Completed."
+						print "To install updates run:\nsudo make reinstall"
+					except:
+						print "Git not installed."
+						print "Go here for download:"
+						print "https://github.com/GarageLabsCorps/apollo"
+			else:
+				print bcolors.GN+"Your software is up to date."+bcolors.ENDC
+			raw_input("<ENTER> to continue")
+			sys.exit()
+except Exception as e:
+	print e
 print "v"+v
 w=tk.Tk()
 w.title("Apollo")
@@ -101,7 +138,8 @@ wh=58
 ws=w.winfo_screenwidth()
 hs=w.winfo_screenheight()
 x=(ws/2)-(ww/2)
-y=(hs/2)-(wh/2)
+#y=(hs/2)-(wh/2)
+y=(hs/2)-(wh/2)*4
 #print '%dx%d+%d+%d'%(ww,wh,x,y)
 w.geometry('%dx%d+%d+%d'%(ww,wh,x,y))
 w.geometry("")
