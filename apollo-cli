@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+import os,sys
+from difflib import SequenceMatcher
+v="0.1"
+def trow():
+	return int(os.popen('stty size','r').read().split()[0])
+def tcolumns():
+	return int(os.popen('stty size','r').read().split()[1])
+def similar(a,b):
+	return SequenceMatcher(None,a,b).ratio()*100
+def gs(n,r):
+	for a in r:
+		if a.split("|")[-1]==str(n):
+			#return "".join("".join(a.split("|")[:-1]).split(".")[:-1])
+			return "".join(a.split("|")[:-1])
+			break
+class bcolors:
+	GN='\033[92m'
+	BE='\033[94m'
+	BOLD='\033[1m'
+	ENDC='\033[0m'
+def main():
+	sw=[f for f in os.listdir("/usr/share/applications/") if os.path.isfile("/usr/share/applications/"+f)]
+	sl={}
+	sa={}
+	for s in sw:
+		if s.endswith(".desktop"):
+			fi=open("/usr/share/applications/"+s,"r")
+			sc=fi.read()
+			fi.close()
+			name=""
+			ex=""
+			for line in sc.splitlines():
+				if "Name=" in line and name=="":
+					name=line.replace("Name=","")
+				elif "Exec=" in line and ex=="" and not "TryExec=" in line:
+					ex=line.replace("Exec=","")
+			#sl[sw]=name+"&|&"+ex
+			sl[name]=ex
+			sa[name]=s
+	q=raw_input("Search: ")
+	n=0
+	rs=[]
+	re=[]
+	for s in sa.keys():
+		#ts="".join(s.split(".")[:-1])
+		rs.append(s+"|"+str(n))
+		re.append(similar(q,s))
+		n+=1
+	rr=list(reversed(sorted(re)))
+	n=0
+	for a in range(5):
+		if str(rr[a])!="0.0":
+			r=gs(re.index(rr[a]),rs)
+			print bcolors.GN+bcolors.BOLD+r+bcolors.ENDC+"_"*(tcolumns()-len(r)-len(str(int(rr[a])))-1)+bcolors.BE+str(int(rr[a]))+"%"+bcolors.ENDC
+			n+=1
+	if n==0:
+		print "No results for '"+q+"'"
+	else:
+		num=6
+		while num>5:
+			num=raw_input("> ")
+			if num.isdigit():
+				os.system(sl[gs(re.index(rr[int(num)]),rs)])
+			else:
+				num=6
+
+main()
+
+#####################
+# Garage Labs Corps #
+#      apollo       #
+#        0.1        #
+#####################

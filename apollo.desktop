@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Apollo
+Comment=Launcher
+Exec=apollo
+Type=Application
+Icon=/usr/local/share/apollo/apollo.png
+Categories=Utility;

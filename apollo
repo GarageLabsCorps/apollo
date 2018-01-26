@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+import os,sys
+from difflib import SequenceMatcher
+try:
+	import tkinter as tk
+except:
+	import Tkinter as tk
+v="0.1"
+def trow():
+	return int(os.popen('stty size','r').read().split()[0])
+def tcolumns():
+	return int(os.popen('stty size','r').read().split()[1])
+def similar(a,b):
+	return SequenceMatcher(None,a,b).ratio()*100
+def gs(n,r):
+	for a in r:
+		if a.split("|")[-1]==str(n):
+			#return "".join("".join(a.split("|")[:-1]).split(".")[:-1])
+			return "".join(a.split("|")[:-1])
+			break
+def exe(w):
+	os.system("%s"%w)
+def entrytext(e):
+	sw=[f for f in os.listdir("/usr/share/applications/") if os.path.isfile("/usr/share/applications/"+f)]
+	sl={}
+	sa={}
+	for s in sw:
+		if s.endswith(".desktop"):
+			fi=open("/usr/share/applications/"+s,"r")
+			sc=fi.read()
+			fi.close()
+			name=""
+			ex=""
+			for line in sc.splitlines():
+				if "Name=" in line and name=="":
+					name=line.replace("Name=","")
+				elif "Exec=" in line and ex=="" and not "TryExec=" in line:
+					ex=line.replace("Exec=","")
+			#sl[sw]=name+"&|&"+ex
+			sl[name]=ex
+			sa[name]=s
+	txt=e.widget.get()
+	#print txt
+	q=txt
+	n=0
+	rs=[]
+	re=[]
+	for s in sa.keys():
+		#ts="".join(s.split(".")[:-1])
+		rs.append(s+"|"+str(n))
+		re.append(similar(q,s))
+		n+=1
+	rr=list(reversed(sorted(re)))
+	n=0
+	for a in range(5):
+		if str(rr[a])!="0.0":
+			#r=gs(re.index(rr[a]),rs)
+			#print bcolors.GN+bcolors.BOLD+r+bcolors.ENDC+"_"*(tcolumns()-len(r)-len(str(int(rr[a])))-1)+bcolors.BE+str(int(rr[a]))+"%"+bcolors.ENDC
+			n+=1
+	for a in range(5):
+		exec("global rb%d"%a)
+	if "+" in txt or "-" in txt or "*" in txt or "/" in txt:
+		r["text"]=txt,"=",eval(txt)
+		#if rb0.winfo_ismapped():
+			#for a in range(5):
+				#exec("rb%d.pack_forget()"%a)
+	elif n==0:
+		r["text"]="No results for '"+q+"'"
+		if rb0.winfo_ismapped():
+			for a in range(5):
+				exec("rb%d.pack_forget()"%a)
+	else:
+		r["text"]="Looking for:",txt
+		if txt!="":
+			for a in range(5):
+				exec("rb%d['text']='Alt+%s','-','%s'"%(a,alph[a],(gs(re.index(rr[a]),rs))))
+				exec("rb%d.configure(command=lambda:exe('%s'))"%(a,(sl[gs(re.index(rr[a]),rs)])))
+			if not rb0.winfo_ismapped():
+				for a in range(5):
+					exec("rb%d.pack(side=tk.TOP,fill=tk.BOTH)"%a)
+		else:
+			for a in range(5):
+				exec("rb%d.pack_forget()"%a)
+def select(e):
+	if e.keysym=="Down":
+		e.widget.tk_focusNext().focus()
+	elif e.keysym=="Up":
+		pass
+class bcolors:
+	GN='\033[92m'
+	BE='\033[94m'
+	BOLD='\033[1m'
+	ENDC='\033[0m'
+print "v"+v
+w=tk.Tk()
+w.title("Apollo")
+#ww=(w.winfo_width() if w.winfo_width()>1 else w.winfo_reqwidth())
+#wh=(w.winfo_height() if w.winfo_height()>1 else w.winfo_reqheight())
+ww=456
+wh=58
+ws=w.winfo_screenwidth()
+hs=w.winfo_screenheight()
+x=(ws/2)-(ww/2)
+y=(hs/2)-(wh/2)
+#print '%dx%d+%d+%d'%(ww,wh,x,y)
+w.geometry('%dx%d+%d+%d'%(ww,wh,x,y))
+w.geometry("")
+e=tk.Entry(w,width=30,font="arial 20")
+e.pack(side=tk.TOP)
+e.focus_set()
+r=tk.Label(w,text="")
+r.pack(side=tk.TOP)
+alph=["q","w","e","r","t"]
+for a in range(5):
+	exec("global rb%d"%a)
+	exec("rb%d=tk.Button(w,text='')"%a)
+	exec('w.bind_all("<Alt-%s>",lambda event:rb%d.invoke())'%(alph[a],a))
+e.bind("<Key>",entrytext)
+w.bind_all("<Key>",select)
+w.bind_class("Button","<Key-Return>",lambda event:event.widget.invoke())
+w.mainloop()
+
+#####################
+# Garage Labs Corps #
+#      apollo       #
+#        0.1        #
+#####################
