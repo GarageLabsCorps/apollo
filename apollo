@@ -5,7 +5,7 @@ try:
 	import tkinter as tk
 except:
 	import Tkinter as tk
-v="1.0"
+v="1.1"
 def trow():
 	return int(os.popen('stty size','r').read().split()[0])
 def tcolumns():
@@ -18,8 +18,9 @@ def gs(n,r):
 			#return "".join("".join(a.split("|")[:-1]).split(".")[:-1])
 			return "".join(a.split("|")[:-1])
 			break
-def exe(w):
-	os.system("%s &"%w)
+def exe(d):
+	w.destroy()
+	os.system("%s"%d)
 def entrytext(e):
 	sw=[f for f in os.listdir("/usr/share/applications/") if os.path.isfile("/usr/share/applications/"+f)]
 	sl={}
