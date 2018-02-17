@@ -5,7 +5,7 @@ try:
 	import tkinter as tk
 except:
 	import Tkinter as tk
-v="1.1"
+v="1.2"
 def trow():
 	return int(os.popen('stty size','r').read().split()[0])
 def tcolumns():
@@ -33,7 +33,7 @@ def entrytext(e):
 			name=""
 			ex=""
 			for line in sc.splitlines():
-				if "Name=" in line and name=="":
+				if "Name=" in line and name=="" and not "GenericName=" in line:
 					name=line.replace("Name=","")
 				elif "Exec=" in line and ex=="" and not "TryExec=" in line:
 					ex=line.replace("Exec=","")
@@ -49,7 +49,7 @@ def entrytext(e):
 	for s in sa.keys():
 		#ts="".join(s.split(".")[:-1])
 		rs.append(s+"|"+str(n))
-		re.append(similar(q,s))
+		re.append(similar(q.lower(),s.lower()))
 		n+=1
 	rr=list(reversed(sorted(re)))
 	n=0
@@ -66,7 +66,10 @@ def entrytext(e):
 			#for a in range(5):
 				#exec("rb%d.pack_forget()"%a)
 	elif n==0:
-		r["text"]="No results for '"+q+"'"
+		if q!="":
+			r["text"]="No results for '"+q+"'"
+		else:
+			r["text"]=""
 		if rb0.winfo_ismapped():
 			for a in range(5):
 				exec("rb%d.pack_forget()"%a)
@@ -74,7 +77,7 @@ def entrytext(e):
 		r["text"]="Looking for:",txt
 		if txt!="":
 			for a in range(5):
-				exec("rb%d['text']='Alt+%s','-','%s'"%(a,alph[a],(gs(re.index(rr[a]),rs))))
+				exec("rb%d['text']='%s','-','Alt+%s'"%(a,(gs(re.index(rr[a]),rs)),alph[a]))
 				exec("rb%d.configure(command=lambda:exe('%s'))"%(a,(sl[gs(re.index(rr[a]),rs)])))
 			if not rb0.winfo_ismapped():
 				for a in range(5):
@@ -110,6 +113,7 @@ try:
 						lv="".join(re.findall('v="(.*?)"',line))
 						break
 			print "Latest: "+bcolors.BE+"v"+lv+bcolors.ENDC
+			lv=lv.split(".")[0]+"."+"".join(lv.split(".")[1:])
 			if float(v)<float(lv):
 				print bcolors.RD+"Your software isn't up to date."+bcolors.ENDC
 				up=raw_input("Update? [y or n]: ")
@@ -162,5 +166,5 @@ w.mainloop()
 #####################
 # Garage Labs Corps #
 #      apollo       #
-#        1.1        #
+#        1.2        #
 #####################
