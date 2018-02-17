@@ -1,0 +1,170 @@
+#!/usr/bin/env python
+import os,sys
+from difflib import SequenceMatcher
+try:
+	import tkinter as tk
+except:
+	import Tkinter as tk
+v="1.2"
+def trow():
+	return int(os.popen('stty size','r').read().split()[0])
+def tcolumns():
+	return int(os.popen('stty size','r').read().split()[1])
+def similar(a,b):
+	return SequenceMatcher(None,a,b).ratio()*100
+def gs(n,r):
+	for a in r:
+		if a.split("|")[-1]==str(n):
+			#return "".join("".join(a.split("|")[:-1]).split(".")[:-1])
+			return "".join(a.split("|")[:-1])
+			break
+def exe(d):
+	w.destroy()
+	os.system("%s"%d)
+def entrytext(e):
+	sw=[f for f in os.listdir("/usr/share/applications/") if os.path.isfile("/usr/share/applications/"+f)]
+	sl={}
+	sa={}
+	for s in sw:
+		if s.endswith(".desktop"):
+			fi=open("/usr/share/applications/"+s,"r")
+			sc=fi.read()
+			fi.close()
+			name=""
+			ex=""
+			for line in sc.splitlines():
+				if "Name=" in line and name=="" and not "GenericName=" in line:
+					name=line.replace("Name=","")
+				elif "Exec=" in line and ex=="" and not "TryExec=" in line:
+					ex=line.replace("Exec=","")
+			#sl[sw]=name+"&|&"+ex
+			sl[name]=ex
+			sa[name]=s
+	txt=e.widget.get()
+	#print txt
+	q=txt
+	n=0
+	rs=[]
+	re=[]
+	for s in sa.keys():
+		#ts="".join(s.split(".")[:-1])
+		rs.append(s+"|"+str(n))
+		re.append(similar(q.lower(),s.lower()))
+		n+=1
+	rr=list(reversed(sorted(re)))
+	n=0
+	for a in range(5):
+		if str(rr[a])!="0.0":
+			#r=gs(re.index(rr[a]),rs)
+			#print bcolors.GN+bcolors.BOLD+r+bcolors.ENDC+"_"*(tcolumns()-len(r)-len(str(int(rr[a])))-1)+bcolors.BE+str(int(rr[a]))+"%"+bcolors.ENDC
+			n+=1
+	for a in range(5):
+		exec("global rb%d"%a)
+	if "+" in txt or "-" in txt or "*" in txt or "/" in txt:
+		r["text"]=txt,"=",eval(txt)
+		#if rb0.winfo_ismapped():
+			#for a in range(5):
+				#exec("rb%d.pack_forget()"%a)
+	elif n==0:
+		if q!="":
+			r["text"]="No results for '"+q+"'"
+		else:
+			r["text"]=""
+		if rb0.winfo_ismapped():
+			for a in range(5):
+				exec("rb%d.pack_forget()"%a)
+	else:
+		r["text"]="Looking for:",txt
+		if txt!="":
+			for a in range(5):
+				exec("rb%d['text']='%s','-','Alt+%s'"%(a,(gs(re.index(rr[a]),rs)),alph[a]))
+				exec("rb%d.configure(command=lambda:exe('%s'))"%(a,(sl[gs(re.index(rr[a]),rs)])))
+			if not rb0.winfo_ismapped():
+				for a in range(5):
+					exec("rb%d.pack(side=tk.TOP,fill=tk.BOTH)"%a)
+		else:
+			for a in range(5):
+				exec("rb%d.pack_forget()"%a)
+def select(e):
+	if e.keysym=="Down":
+		e.widget.tk_focusNext().focus()
+	elif e.keysym=="Up":
+		pass
+	elif e.keysym=="Escape":
+		w.destroy()
+class bcolors:
+	GN='\033[92m'
+	BE='\033[94m'
+	RD='\033[91m'
+	BOLD='\033[1m'
+	ENDC='\033[0m'
+try:
+	if len(sys.argv)>1:
+		if sys.argv[1]=="-u":
+			import urllib,re
+			print "You are using: "+bcolors.BE+"v"+v+bcolors.ENDC
+			llc=urllib.urlopen("https://raw.githubusercontent.com/GarageLabsCorps/apollo/master/apollo").read()
+			lc=llc.replace("\n","")
+			if not 'v="' in lc:
+				lv="0.1"
+			else:
+				for line in llc.splitlines():
+					if 'v="' in line:
+						lv="".join(re.findall('v="(.*?)"',line))
+						break
+			print "Latest: "+bcolors.BE+"v"+lv+bcolors.ENDC
+			lv=lv.split(".")[0]+"."+"".join(lv.split(".")[1:])
+			if float(v)<float(lv):
+				print bcolors.RD+"Your software isn't up to date."+bcolors.ENDC
+				up=raw_input("Update? [y or n]: ")
+				if up.lower()=="y" or up.lower()=="yes":
+					try:
+						print "Update..."
+						os.system("git clone https://github.com/GarageLabsCorps/apollo temp && cd temp/ && mv ../temp/* .. && rm -rf ../temp")
+						print "Completed."
+						print "To install updates run:\nsudo make reinstall"
+					except:
+						print "Git not installed."
+						print "Go here for download:"
+						print "https://github.com/GarageLabsCorps/apollo"
+			else:
+				print bcolors.GN+"Your software is up to date."+bcolors.ENDC
+			raw_input("<ENTER> to continue")
+			sys.exit()
+except Exception as e:
+	print e
+print "v"+v
+w=tk.Tk()
+w.title("Apollo")
+#ww=(w.winfo_width() if w.winfo_width()>1 else w.winfo_reqwidth())
+#wh=(w.winfo_height() if w.winfo_height()>1 else w.winfo_reqheight())
+ww=456
+wh=58
+ws=w.winfo_screenwidth()
+hs=w.winfo_screenheight()
+x=(ws/2)-(ww/2)
+#y=(hs/2)-(wh/2)
+y=(hs/2)-(wh/2)*4
+#print '%dx%d+%d+%d'%(ww,wh,x,y)
+w.geometry('%dx%d+%d+%d'%(ww,wh,x,y))
+w.geometry("")
+e=tk.Entry(w,width=30,font="arial 20")
+e.pack(side=tk.TOP)
+e.focus_set()
+r=tk.Label(w,text="")
+r.pack(side=tk.TOP)
+alph=["q","w","e","r","t"]
+for a in range(5):
+	exec("global rb%d"%a)
+	exec("rb%d=tk.Button(w,text='')"%a)
+	exec('w.bind_all("<Alt-%s>",lambda event:rb%d.invoke())'%(alph[a],a))
+e.bind("<Key>",entrytext)
+w.bind_all("<Key>",select)
+w.bind_class("Button","<Key-Return>",lambda event:event.widget.invoke())
+w.mainloop()
+
+#####################
+# Garage Labs Corps #
+#      apollo       #
+#        1.2        #
+#####################
