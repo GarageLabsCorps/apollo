@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os,sys
 from difflib import SequenceMatcher
 try:
 	import tkinter as tk
 except:
 	import Tkinter as tk
-v="1.2"
+v="2.0"
 def trow():
 	return int(os.popen('stty size','r').read().split()[0])
 def tcolumns():
@@ -40,7 +41,13 @@ def entrytext(e):
 			#sl[sw]=name+"&|&"+ex
 			sl[name]=ex
 			sa[name]=s
-	txt=e.widget.get()
+	if e.char.lower() in "abcdefghijklmnopqrstuvwxyz0123456789 /*\\|!\"£$%&/()='?ì^èé+òç@à°#ù§,;.:-_¹²³¼½¬{[]}`~ł€¶ŧ←↓→øþæßðđŋħ̉ĸł̉̉̉«»¢“”ñ·¯¬<>":
+		txt=e.widget.get()+e.char
+	else:
+		if e.keysym=="BackSpace":
+			txt=e.widget.get()[:-1]
+		else:
+			txt=e.widget.get()
 	#print txt
 	q=txt
 	n=0
@@ -60,12 +67,7 @@ def entrytext(e):
 			n+=1
 	for a in range(5):
 		exec("global rb%d"%a)
-	if "+" in txt or "-" in txt or "*" in txt or "/" in txt:
-		r["text"]=txt,"=",eval(txt)
-		#if rb0.winfo_ismapped():
-			#for a in range(5):
-				#exec("rb%d.pack_forget()"%a)
-	elif n==0:
+	if n==0:
 		if q!="":
 			r["text"]="No results for '"+q+"'"
 		else:
@@ -74,10 +76,10 @@ def entrytext(e):
 			for a in range(5):
 				exec("rb%d.pack_forget()"%a)
 	else:
-		r["text"]="Looking for:",txt
+		r["text"]="Looking for: "+str(txt)
 		if txt!="":
 			for a in range(5):
-				exec("rb%d['text']='%s','-','Alt+%s'"%(a,(gs(re.index(rr[a]),rs)),alph[a]))
+				exec("rb%d['text']='%s'+' - '+' Alt+%s'"%(a,(gs(re.index(rr[a]),rs)),alph[a]))
 				exec("rb%d.configure(command=lambda:exe('%s'))"%(a,(sl[gs(re.index(rr[a]),rs)])))
 			if not rb0.winfo_ismapped():
 				for a in range(5):
@@ -85,13 +87,29 @@ def entrytext(e):
 		else:
 			for a in range(5):
 				exec("rb%d.pack_forget()"%a)
+	if "+" in txt or "-" in txt or "*" in txt or "/" in txt:
+		try:
+			r["text"]=txt,"=",eval(txt)
+		except:
+			pass
+		#if rb0.winfo_ismapped():
+			#for a in range(5):
+				#exec("rb%d.pack_forget()"%a)
 def select(e):
 	if e.keysym=="Down":
 		e.widget.tk_focusNext().focus()
 	elif e.keysym=="Up":
-		pass
+		e.widget.tk_focusPrev().focus()
 	elif e.keysym=="Escape":
 		w.destroy()
+def ctrla(event):
+	# select text after 50ms
+	w.after(50,slctalltxt,event.widget)
+def slctalltxt(widget):
+	# select text
+	widget.select_range(0,'end')
+	# move cursor to the end
+	widget.icursor('end')
 class bcolors:
 	GN='\033[92m'
 	BE='\033[94m'
@@ -134,31 +152,46 @@ try:
 except Exception as e:
 	print e
 print "v"+v
+bgcolor="#222"
+bg2color="#444"
+hgcolor="#888"
+hfcolor="#fff"
+fgcolor="#fff"
 w=tk.Tk()
+#w.overrideredirect(1)
+#w.wm_attributes('-type','splash')
 w.title("Apollo")
+try:
+	w.iconbitmap("@apollo.xbm")
+except:
+	w.iconbitmap("@/usr/local/share/apollo/apollo.xbm")
+w.configure(bg=bgcolor)
 #ww=(w.winfo_width() if w.winfo_width()>1 else w.winfo_reqwidth())
 #wh=(w.winfo_height() if w.winfo_height()>1 else w.winfo_reqheight())
 ww=456
 wh=58
-ws=w.winfo_screenwidth()
-hs=w.winfo_screenheight()
+#ws=w.winfo_screenwidth()
+#hs=w.winfo_screenheight()
+ws,hs=os.popen("xrandr | grep '*'").read().split("\n")[0].split(" ")[3].split("x")
+ws=int(ws);hs=int(hs)
 x=(ws/2)-(ww/2)
 #y=(hs/2)-(wh/2)
 y=(hs/2)-(wh/2)*4
 #print '%dx%d+%d+%d'%(ww,wh,x,y)
 w.geometry('%dx%d+%d+%d'%(ww,wh,x,y))
 w.geometry("")
-e=tk.Entry(w,width=30,font="arial 20")
+e=tk.Entry(w,width=30,font="arial 20",bd=0,highlightthickness=.5,bg=bg2color,fg=fgcolor,insertbackground=fgcolor,highlightbackground=bg2color,highlightcolor=bg2color)
 e.pack(side=tk.TOP)
 e.focus_set()
-r=tk.Label(w,text="")
+r=tk.Label(w,text="",bg=bgcolor,fg=fgcolor)
 r.pack(side=tk.TOP)
 alph=["q","w","e","r","t"]
 for a in range(5):
 	exec("global rb%d"%a)
-	exec("rb%d=tk.Button(w,text='')"%a)
+	exec("rb%d=tk.Button(w,text='',font='arial 15',bd=0,highlightthickness=.5,bg=bg2color,fg=fgcolor,activebackground=hgcolor,activeforeground=hfcolor,highlightbackground=bg2color,highlightcolor=hgcolor)"%a)
 	exec('w.bind_all("<Alt-%s>",lambda event:rb%d.invoke())'%(alph[a],a))
 e.bind("<Key>",entrytext)
+e.bind("<Control-a>",ctrla)
 w.bind_all("<Key>",select)
 w.bind_class("Button","<Key-Return>",lambda event:event.widget.invoke())
 w.mainloop()
@@ -166,5 +199,5 @@ w.mainloop()
 #####################
 # Garage Labs Corps #
 #      apollo       #
-#        1.2        #
+#        2.0        #
 #####################

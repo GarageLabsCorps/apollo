@@ -9,6 +9,7 @@ install:
 	chmod +x /usr/share/applications/apollo.desktop; \
 	mkdir /usr/local/share/apollo/; \
 	cp apollo.png /usr/local/share/apollo/; \
+	cp apollo.xbm /usr/local/share/apollo/; \
 	fi
 
 uninstall:
@@ -27,6 +28,7 @@ reinstall:
 	rm -rf /usr/local/share/apollo/; \
 	mkdir /usr/local/share/apollo/; \
 	cp apollo.png /usr/local/share/apollo/; \
+	cp apollo.xbm /usr/local/share/apollo/; \
 	fi
 	cp apollo $(pre)apollo
 	chmod +x $(pre)apollo
